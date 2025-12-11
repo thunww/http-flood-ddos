@@ -2,7 +2,7 @@ groups:
   - name: ddos_alert_group
     rules:
       - alert: PossibleDDoS
-        expr: rate(nginx_http_requests_total[10s]) > 200
+        expr: rate(nginx_http_requests_total[10s]) > 50
         for: 5s
         labels:
           severity: "critical"
@@ -18,7 +18,7 @@ groups:
           description: "🔥 CPU server vượt 40% → khả năng bị tấn công"
       
       - alert: ConfirmedDDoS
-        expr: (rate(nginx_http_requests_total[10s]) > 200) and ((1 - avg by (instance)(rate(node_cpu_seconds_total{mode="idle"}[15s]))) > 0.40)
+        expr: (rate(nginx_http_requests_total[10s]) > 50) and ((1 - avg by (instance)(rate(node_cpu_seconds_total{mode="idle"}[15s]))) > 0.40)
         for: 5s
         labels:
           severity: "critical"
