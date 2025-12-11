@@ -40,10 +40,21 @@ services:
   node_exporter:
     image: prom/node-exporter
     container_name: node_exporter
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     ports:
       - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host:ro
     networks:
       - mon_net
+    pid: host
+    restart: unless-stopped
 
   # ===========================
   # CADVISOR (CPU DOCKER)
@@ -60,6 +71,8 @@ services:
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    restart: unless-stopped
 
   # ===========================
   # NGINX EXPORTER (Traffic)
@@ -74,6 +87,7 @@ services:
       - mon_net
     depends_on:
       - nginx
+    restart: unless-stopped
 
   # ===========================
   # PROMETHEUS
@@ -88,6 +102,7 @@ services:
       - ./monitoring/alert.rules:/etc/prometheus/alert.rules
     networks:
       - mon_net
+    restart: unless-stopped
 
   # ===========================
   # ALERT MANAGER
@@ -101,6 +116,7 @@ services:
       - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     networks:
       - mon_net
+    restart: unless-stopped
 
 networks:
   mon_net:
