@@ -1,28 +1,26 @@
 groups:
-- name: ddos_alert_group
-  rules:
-
-  - alert: PossibleDDoS
-    expr: rate(nginx_http_requests_total[10s]) > 200
-    for: 5s
-    labels:
-      severity: "critical"
-    annotations:
-      description: "🚨 Traffic Nginx tăng mạnh → nghi ngờ HTTP Flood"
-
-  - alert: HighCPUServer
-    expr: (1 - avg by (instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[15s]))) > 0.40
-    for: 5s
-    labels:
-      severity: "warning"
-    annotations:
-      description: "🔥 CPU server vượt 40% → khả năng bị tấn công"
-
-  - alert: ConfirmedDDoS
-    expr: (rate(nginx_http_requests_total[10s]) > 200)
-          and ((1 - avg by (instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[15s]))) > 0.40)
-    for: 5s
-    labels:
-      severity: "critical"
-    annotations:
-      description: "🔥 XÁC NHẬN DDOS: traffic spike + CPU cao"
+  - name: ddos_alert_group
+    rules:
+      - alert: PossibleDDoS
+        expr: rate(nginx_http_requests_total[10s]) > 200
+        for: 5s
+        labels:
+          severity: "critical"
+        annotations:
+          description: "🚨 Traffic Nginx tăng mạnh → nghi ngờ HTTP Flood"
+      
+      - alert: HighCPUServer
+        expr: (1 - avg by (instance)(rate(node_cpu_seconds_total{mode="idle"}[15s]))) > 0.40
+        for: 5s
+        labels:
+          severity: "warning"
+        annotations:
+          description: "🔥 CPU server vượt 40% → khả năng bị tấn công"
+      
+      - alert: ConfirmedDDoS
+        expr: (rate(nginx_http_requests_total[10s]) > 200) and ((1 - avg by (instance)(rate(node_cpu_seconds_total{mode="idle"}[15s]))) > 0.40)
+        for: 5s
+        labels:
+          severity: "critical"
+        annotations:
+          description: "🔥 XÁC NHẬN DDOS: traffic spike + CPU cao"
