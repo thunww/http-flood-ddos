@@ -8,7 +8,7 @@ receivers:
   - name: telegram_channel
     telegram_configs:
       - bot_token: "8133242338:AAFMStN4OmT8-j3P_UxVepLvVf9x5pqToCk"
-        chat_id: "6163552209"
+        chat_id: 6163552209
         parse_mode: "Markdown"
         message: |
           🚨 *DDoS ALERT DETECTED*
