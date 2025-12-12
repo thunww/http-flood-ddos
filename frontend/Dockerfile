@@ -2,7 +2,11 @@ FROM node:20 AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+
+# Cài từng bước để dễ debug
+RUN npm cache clean --force
+RUN npm install --legacy-peer-deps --loglevel verbose
+
 COPY . .
 RUN npm run build
 
