@@ -37,7 +37,7 @@ services:
       - ./nginx/logs:/var/log/nginx
 
   # ===========================
-  # NODE EXPORTER (CPU SERVER)
+  # NODE EXPORTER
   # ===========================
   node_exporter:
     image: prom/node-exporter:latest
@@ -47,8 +47,6 @@ services:
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/host'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    ports:
-      - "9100:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -59,10 +57,10 @@ services:
     restart: unless-stopped
 
   # ===========================
-  # CADVISOR (CPU DOCKER)
+  # CADVISOR
   # ===========================
   cadvisor:
-    image: zcube/cadvisor:latest  
+    image: zcube/cadvisor:latest
     container_name: cadvisor
     ports:
       - "8081:8080"
@@ -77,7 +75,7 @@ services:
     restart: unless-stopped
 
   # ===========================
-  # NGINX EXPORTER (Traffic)
+  # NGINX EXPORTER
   # ===========================
   nginx_exporter:
     image: nginx/nginx-prometheus-exporter:latest
@@ -97,8 +95,6 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
-    ports:
-      - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./monitoring/alert.rules:/etc/prometheus/alert.rules
@@ -112,15 +108,14 @@ services:
   alertmanager:
     image: prom/alertmanager:latest
     container_name: alertmanager
-    ports:
-      - "9093:9093"
     volumes:
       - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     networks:
       - mon_net
     restart: unless-stopped
+
   # ===========================
-  # GO ACCESS
+  # GOACCESS (FIXED)
   # ===========================
   goaccess:
     image: allinurl/goaccess:latest
@@ -134,19 +129,16 @@ services:
     volumes:
       - ./nginx/logs:/logs:ro
       - ./goaccess:/report
+      - ./goaccess/etc/goaccess.conf:/etc/goaccess/goaccess.conf:ro
     restart: unless-stopped
     entrypoint: ["goaccess"]
     command:
       - /logs/access.log
-      - --log-format=%h %^ %e [%d:%t %^] "%r" %s %b "%R" "%u"
-      - --date-format=%d/%b/%Y
-      - --time-format=%T
-      - --real-time-html
-      - --ws-url=ws://192.168.186.146:7890
-      - --port=7890
-      - -o
-      - /report/report.html
+      - --config-file=/etc/goaccess/goaccess.conf
 
+  # ===========================
+  # GOACCESS WEB
+  # ===========================
   goaccess_web:
     image: nginx:alpine
     container_name: goaccess_web
@@ -157,12 +149,6 @@ services:
     networks:
       - mon_net
     restart: unless-stopped
-
-
-
-
-
-
 
 networks:
   mon_net:
