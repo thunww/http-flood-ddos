@@ -33,6 +33,8 @@ services:
       - backend
     networks:
       - mon_net
+    volumes:
+      - ./nginx/logs:/var/log/nginx
 
   # ===========================
   # NODE EXPORTER (CPU SERVER)
@@ -117,6 +119,50 @@ services:
     networks:
       - mon_net
     restart: unless-stopped
+  # ===========================
+  # GO ACCESS
+  # ===========================
+  goaccess:
+    image: allinurl/goaccess:latest
+    container_name: goaccess
+    depends_on:
+      - nginx
+    networks:
+      - mon_net
+    ports:
+      - "7890:7890"
+    volumes:
+      - ./nginx/logs:/logs:ro
+      - ./goaccess:/report
+    restart: unless-stopped
+    entrypoint: ["goaccess"]
+    command:
+      - /logs/access.log
+      - --log-format=%h %^ %e [%d:%t %^] "%r" %s %b "%R" "%u"
+      - --date-format=%d/%b/%Y
+      - --time-format=%T
+      - --real-time-html
+      - --ws-url=ws://192.168.186.146:7890
+      - --port=7890
+      - -o
+      - /report/report.html
+
+  goaccess_web:
+    image: nginx:alpine
+    container_name: goaccess_web
+    ports:
+      - "7880:80"
+    volumes:
+      - ./goaccess:/usr/share/nginx/html:ro
+    networks:
+      - mon_net
+    restart: unless-stopped
+
+
+
+
+
+
 
 networks:
   mon_net:
