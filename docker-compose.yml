@@ -115,7 +115,7 @@ services:
     restart: unless-stopped
 
   # ===========================
-  # GOACCESS (FIXED)
+  # GOACCESS
   # ===========================
   goaccess:
     image: allinurl/goaccess:latest
@@ -130,11 +130,11 @@ services:
       - ./nginx/logs:/logs:ro
       - ./goaccess:/report
       - ./goaccess/etc/goaccess.conf:/etc/goaccess/goaccess.conf:ro
-    restart: unless-stopped
     entrypoint: ["goaccess"]
     command:
       - /logs/access.log
       - --config-file=/etc/goaccess/goaccess.conf
+    restart: unless-stopped
 
   # ===========================
   # GOACCESS WEB
@@ -148,6 +148,23 @@ services:
       - ./goaccess:/usr/share/nginx/html:ro
     networks:
       - mon_net
+    restart: unless-stopped
+
+  # ===========================
+  # GRAFANA (AUTO PROVISION)
+  # ===========================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - mon_net
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/provisioning/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
 
 networks:
